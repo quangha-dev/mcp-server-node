@@ -12,10 +12,18 @@ function hasCreateState(session) {
 function parseNameCode(question) {
     const res = {};
     if (!question) return res;
+    const stopWords = /(mã\s+code|ma\s+code|code|bắt\s+đầu|bat\s+dau|kết\s+thúc|ket\s+thuc)/i;
+    const trimAtStop = (text) => {
+        if (!text) return text;
+        const parts = text.split(stopWords);
+        return parts[0].trim().replace(/^["']|["']$/g, '');
+    };
+
     const nameMatch = question.match(/t(?:ê|e)n\s+là\s+([^,.;\n]+)/i);
-    if (nameMatch) res.name = nameMatch[1].trim().replace(/^["']|["']$/g, '');
+    if (nameMatch) res.name = trimAtStop(nameMatch[1]);
+
     const codeMatch = question.match(/mã\s+code\s+(?:là\s+)?([^,.;\n]+)/i) || question.match(/\bcode\s+(?:là\s+)?([^,.;\n]+)/i);
-    if (codeMatch) res.code = codeMatch[1].trim().replace(/^["']|["']$/g, '');
+    if (codeMatch) res.code = trimAtStop(codeMatch[1]);
     return res;
 }
 

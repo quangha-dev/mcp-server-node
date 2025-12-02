@@ -12,6 +12,7 @@ class ProjectTools {
      * Tool entry: xử lý create_project
      */
     async handleCreateProject({ question, token, session, changes = [] }) {
+        this.sanitizeNameCode(session);
         // Bước 1: resolve context (company/workspace)
         const guideMsg = await this.resolveContext(session, token, question);
         if (guideMsg) {
@@ -79,12 +80,23 @@ class ProjectTools {
         const result = await this.executeCreate(session, token);
         let finalAnswer;
         if (result.success) {
+            session._pending_confirmation = false;
             const systemPayload = {
                 action: 'create_project',
                 project: result.data.data,
                 params: session
             };
-            finalAnswer = await llmService.generateResponse(question, systemPayload);
+            try {
+                const aiAnswer = await llmService.generateResponse(question, systemPayload);
+                const text = (aiAnswer || '').trim();
+                if (text.startsWith('{') || text.startsWith('[')) {
+                    finalAnswer = this.prettyProjectResponse(systemPayload.project, session);
+                } else {
+                    finalAnswer = text;
+                }
+            } catch (e) {
+                finalAnswer = this.prettyProjectResponse(systemPayload.project, session);
+            }
             sessionManager.clearSession(token);
         } else {
             const msg = typeof result.error === 'string'
@@ -99,7 +111,7 @@ class ProjectTools {
             }
         }
 
-        return { answer: finalAnswer, action: "create_project", params: session, backend_raw_data: result };
+        return { answer: finalAnswer, action: "create_project", params: result.success ? {} : session, backend_raw_data: result };
     }
 
     validateParams(sessionData) {
@@ -248,6 +260,22 @@ class ProjectTools {
             `Bắt đầu: ${data.start_date || '(chưa có)'}`,
             `Kết thúc: ${data.end_date || '(chưa có)'}`
         ].join(' | ');
+    }
+
+    prettyProjectResponse(project, sessionData) {
+        const companyLabel = sessionData.company_name || sessionData.company_id || '(không rõ công ty)';
+        const workspaceLabel = sessionData.workspace_name || sessionData.workspace_id || '(không rõ workspace)';
+        return `Dự án "${project.name}" (ID: ${project.id}) đã tạo thành công với mã "${project.projectCode}". Công ty: ${companyLabel}; Workspace: ${workspaceLabel}; Bắt đầu: ${project.startDate}; Kết thúc: ${project.dueDate || sessionData.end_date || 'không có'}.`;
+    }
+
+    sanitizeNameCode(sessionData) {
+        const cutWords = /(mã\s+code|ma\s+code|code|bắt\s+đầu|bat\s+dau|kết\s+thúc|ket\s+thuc)/i;
+        if (sessionData.name && cutWords.test(sessionData.name)) {
+            sessionData.name = sessionData.name.split(cutWords)[0].trim();
+        }
+        if (sessionData.code && cutWords.test(sessionData.code)) {
+            sessionData.code = sessionData.code.split(cutWords)[0].trim();
+        }
     }
 
     async executeCreate(sessionData, token) {

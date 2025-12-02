@@ -87,9 +87,11 @@ class LLMService {
     async generateResponse(question, systemResult) {
         const prompt = `
         User hỏi: "${question}"
-        Kết quả hệ thống thực hiện: ${JSON.stringify(systemResult)}
-        
-        Hãy viết câu trả lời ngắn gọn, thân thiện bằng tiếng Việt thông báo kết quả.
+        Kết quả hệ thống thực hiện (JSON): ${JSON.stringify(systemResult)}
+
+        Viết câu trả lời tiếng Việt, ngắn gọn, thân thiện, dạng mô tả dễ đọc.
+        Ưu tiên liệt kê thông tin chính (Tên dự án, Mã, Công ty, Workspace, Ngày bắt đầu/kết thúc, ID) bằng câu tự nhiên.
+        KHÔNG trả về JSON, KHÔNG dùng markdown, không gói trong code block.
         `;
         try {
             const result = await getModel().generateContent(prompt);
