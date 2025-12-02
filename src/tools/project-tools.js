@@ -191,7 +191,7 @@ class ProjectTools {
                     sessionData.company_name = companies[0].companyName;
                 } else {
                     const list = companies.map(c => `- ${c.companyName}`).join('\n');
-                    return `Bạn muốn tạo dự án cho công ty nào?\n${list}`;
+                    return `Bạn muốn tạo dự án cho công ty nào? Bạn chỉ có quyền trong các công ty sau:\n${list}`;
                 }
             }
 
@@ -228,10 +228,10 @@ class ProjectTools {
                     sessionData.workspace_id = String(validWorkspaces[0].workspaceId);
                     sessionData.workspace_name = validWorkspaces[0].workspaceName;
                 } else if (validWorkspaces.length === 0) {
-                    return "Công ty này chưa có Workspace nào.";
+                    return "Công ty này chưa có Workspace nào bạn có quyền.";
                 } else {
                     const list = validWorkspaces.map(w => `- ${w.workspaceName}`).join('\n');
-                    return `Trong công ty này, bạn chọn Workspace nào?\n${list}`;
+                    return `Trong công ty này, bạn chỉ có quyền ở các Workspace sau. Bạn chọn Workspace nào?\n${list}`;
                 }
             }
 
