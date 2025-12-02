@@ -135,7 +135,7 @@ class ProjectTools {
             errors.push('Mã code cần tối thiểu 2 ký tự.');
         }
         if (errors.length > 0) {
-            return { valid: false, message: errors.join(' ') };
+            return { valid: false, message: `Thông tin chưa hợp lệ: ${errors.join(' ')}` };
         }
         return { valid: true };
     }
@@ -189,9 +189,11 @@ class ProjectTools {
                 if (companies.length === 1) {
                     sessionData.company_id = String(companies[0].companyId);
                     sessionData.company_name = companies[0].companyName;
+                } else if (companies.length === 0) {
+                    return "Mình chưa thấy công ty nào bạn được cấp quyền. Hãy kiểm tra lại tài khoản hoặc xin cấp quyền.";
                 } else {
                     const list = companies.map(c => `- ${c.companyName}`).join('\n');
-                    return `Bạn muốn tạo dự án cho công ty nào? Bạn chỉ có quyền trong các công ty sau:\n${list}`;
+                    return `Mình thấy bạn có quyền ở các công ty sau:\n${list}\nBạn muốn tạo dự án cho công ty nào? Bạn có thể nhập tên gần đúng.`;
                 }
             }
 
@@ -228,10 +230,10 @@ class ProjectTools {
                     sessionData.workspace_id = String(validWorkspaces[0].workspaceId);
                     sessionData.workspace_name = validWorkspaces[0].workspaceName;
                 } else if (validWorkspaces.length === 0) {
-                    return "Công ty này chưa có Workspace nào bạn có quyền.";
+                    return "Trong công ty này bạn chưa được cấp workspace nào. Bạn có thể chọn công ty khác hoặc nhờ cấp quyền.";
                 } else {
                     const list = validWorkspaces.map(w => `- ${w.workspaceName}`).join('\n');
-                    return `Trong công ty này, bạn chỉ có quyền ở các Workspace sau. Bạn chọn Workspace nào?\n${list}`;
+                    return `Bạn có quyền ở các workspace sau:\n${list}\nBạn muốn chọn workspace nào? Nhập tên gần đúng cũng được.`;
                 }
             }
 
