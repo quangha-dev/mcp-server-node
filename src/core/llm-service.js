@@ -109,8 +109,9 @@ class LLMService {
         Bạn là trợ lý AI đang thu thập thông tin để tạo dự án.
         Các trường còn thiếu: ${missingFields.join(', ')}.
         Ngữ cảnh hiện có: ${JSON.stringify(sessionSnapshot)}.
-        Hãy hỏi người dùng (tiếng Việt, ngắn gọn) để điền các trường còn thiếu. 
-        Nếu có nhiều trường, hỏi gộp trong 1-2 câu rõ ràng.
+        Viết câu hỏi tiếng Việt tự nhiên, thân thiện, ngắn gọn (giọng chat).
+        Nếu thiếu nhiều trường, gộp hỏi trong 1-2 câu, tránh liệt kê khô khan.
+        Tránh mệnh lệnh "vui lòng/please", chỉ hỏi như hội thoại bình thường.
         `;
         try {
             const result = await getModel().generateContent(prompt);

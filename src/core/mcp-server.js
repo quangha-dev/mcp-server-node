@@ -13,7 +13,22 @@ class MCPServer {
 
     _configureMiddleware() {
         this.app.use(cors());
-        this.app.use(bodyParser.json());
+        // Parse JSON body; catch malformed JSON and return a clean 400 response
+        this.app.use(bodyParser.json({
+            verify: (req, res, buf) => {
+                // Keep raw body for debugging if needed
+                req.rawBody = buf?.toString();
+            }
+        }));
+        this.app.use((err, req, res, next) => {
+            if (err instanceof SyntaxError && 'body' in err) {
+                return res.status(400).json({
+                    error: 'Invalid JSON payload. Please ensure body is valid JSON and escape special characters.',
+                    details: err.message
+                });
+            }
+            next(err);
+        });
     }
 
     _configureRoutes() {
